@@ -1,0 +1,204 @@
+{% extends "bootstrap/base.html" %} {% block styles %} {{super()}}
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<style>
+  #map {
+    height: 100vh;
+    width: 100%;
+  }
+  .custom-marker {
+    position: relative;
+    display: block;
+    width: 60px; /* 考虑边框和箭头 */
+    height: 60px; /* 考虑边框和箭头 */
+    background-color: transparent;
+    cursor: pointer;
+  }
+  .custom-marker img {
+    position: absolute;
+    top: 5px; /* 边框高度 */
+    left: 5px; /* 边框宽度 */
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    /* border-radius: 50%; */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    border: 2px solid white; /* 白色边框 */
+  }
+  .custom-marker .arrow {
+    position: absolute;
+    bottom: -10px; /* 箭头向下偏移 */
+    left: 25px; /* 箭头水平居中 */
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid white; /* 白色箭头 */
+  }
+  .cont-line {
+    margin: 5px auto;
+  }
+  .title {
+    font-weight: bolder;
+  }
+  .cont {
+    color: gray;
+  }
+  .tb-title {
+    float: left;
+    font-weight: bolder;
+  }
+  table {
+    margin: 10px auto;
+  }
+  tr {
+    height: 20px;
+  }
+  td {
+    font-size: 20px;
+  }
+</style>
+
+{% endblock %} {% block content %}
+<div id="map"></div>
+<div class="modal" tabindex="-1" role="dialog" id="myModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">image info</h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <img src="" alt="" id="img" style="width: 100%" />
+        <div class="card">
+          <div class="card-header">
+            <h3>Image Details</h3>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <label for="id">CAMERA ID:</label>
+                <input
+                  type="text"
+                  id="id"
+                  class="form-control"
+                  value="camera-001"
+                  readonly
+                />
+              </div>
+              <div class="col-md-6">
+                <label for="name">Name:</label>
+                <input
+                  type="text"
+                  id="name"
+                  class="form-control"
+                  value="Sample Marker"
+                  readonly
+                />
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <label for="lng">Longitude:</label>
+                <input
+                  type="text"
+                  id="lng"
+                  class="form-control"
+                  value="121.4737"
+                  readonly
+                />
+              </div>
+              <div class="col-md-6">
+                <label for="lat">Latitude:</label>
+                <input
+                  type="text"
+                  id="lat"
+                  class="form-control"
+                  value="31.2304"
+                  readonly
+                />
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <label for="location">Location:</label>
+                <input
+                  type="text"
+                  id="location"
+                  class="form-control"
+                  value="555 Dongyang Street, Yiwu City, Zhejiang Province"
+                  readonly
+                />
+              </div>
+              <div class="col-md-6">
+                <label for="time">Time:</label>
+                <input
+                  type="text"
+                  id="time"
+                  class="form-control"
+                  value="2023-10-01 12:00:00"
+                  readonly
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %} {{ super() }}
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+  var map = L.map("map").setView([29, 120], 13);
+
+  const tdtWmtsLayer = L.tileLayer(
+    `https://t4.tianditu.gov.cn/img_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=vec&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=17646088394b62471c539da713a9ecc0`
+  );
+  //map.addLayer(tdtWmtsLayer);
+
+   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+   }).addTo(map);
+
+  fetch("/api/photos")
+    .then((response) => response.json())
+    .then((data) => {
+      data.forEach((photo) => {
+        var customMarker = L.divIcon({
+          html: `<div class="custom-marker">
+                    <img src="${photo.path}" />
+                    <div class="arrow"></div>
+                </div>`,
+          iconSize: [60, 60],
+          className: "custom-marker",
+        });
+
+        let marker = L.marker([photo.latitude, photo.longitude], {
+          icon: customMarker,
+        })
+          .addTo(map)
+          .on("click", function (e) {
+            console.log(e);
+            $("#myModal").modal("toggle");
+            $(document).ready(function () {
+              $("#img").attr("src", e.target.id);
+            });
+          });
+        marker.id = photo.path;
+      });
+    });
+</script>
+{% endblock %}
