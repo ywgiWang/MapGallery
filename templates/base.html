@@ -164,10 +164,6 @@
 <script>
   var map = L.map("map").setView([29, 120], 13);
 
-  const tdtWmtsLayer = L.tileLayer(
-    `https://t4.tianditu.gov.cn/img_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=vec&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=17646088394b62471c539da713a9ecc0`
-  );
-  //map.addLayer(tdtWmtsLayer);
 
    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

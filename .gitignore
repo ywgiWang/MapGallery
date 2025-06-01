@@ -2,3 +2,5 @@
 /__pycache__
 /.vscode
 mysql.md
+config.py
+func.py

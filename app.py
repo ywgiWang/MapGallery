@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, render_template
 import mysql.connector
-
 from flask_bootstrap import Bootstrap
+from config import DatabaseConfig  # 新增导入
 
 app = Flask(__name__)
 class Config:
@@ -15,7 +15,10 @@ Bootstrap(app)
 @app.route("/api/photos", methods=["GET"])
 def get_photos():
     connection = mysql.connector.connect(
-        host="localhost", database="piconmap", user="pic", password="onmap_&123"
+        host=DatabaseConfig.HOST, 
+        database=DatabaseConfig.DATABASE, 
+        user=DatabaseConfig.USER, 
+        password=DatabaseConfig.PASSWORD
     )
     cursor = connection.cursor(dictionary=True)
     query = "SELECT * FROM photos"
