@@ -12,20 +12,26 @@ class Config:
 app.config.from_object(Config)
 Bootstrap(app)
 
+# 应用启动时初始化连接池（建议放在app初始化后）
+db_pool = mysql.connector.pooling.MySQLConnectionPool(
+    pool_name="pic_pool",
+    pool_size=5,  # 根据业务需求调整连接数
+    host=DatabaseConfig.HOST,
+    database=DatabaseConfig.DATABASE,
+    user=DatabaseConfig.USER,
+    password=DatabaseConfig.PASSWORD
+)
+
 @app.route("/api/photos", methods=["GET"])
 def get_photos():
-    connection = mysql.connector.connect(
-        host=DatabaseConfig.HOST, 
-        database=DatabaseConfig.DATABASE, 
-        user=DatabaseConfig.USER, 
-        password=DatabaseConfig.PASSWORD
-    )
+    # 从连接池获取连接（替代直接connect）
+    connection = db_pool.get_connection()
     cursor = connection.cursor(dictionary=True)
     query = "SELECT * FROM photos"
     cursor.execute(query)
     photos = cursor.fetchall()
     cursor.close()
-    connection.close()
+    connection.close()  # 实际是归还连接到池，而非真正关闭
     return jsonify(photos)
 
 
