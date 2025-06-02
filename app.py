@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template,request
 import mysql.connector
 from flask_bootstrap import Bootstrap
 from config import DatabaseConfig  # 新增导入
@@ -6,7 +6,7 @@ from config import DatabaseConfig  # 新增导入
 app = Flask(__name__)
 class Config:
     HOST = "0.0.0.0"
-    PORT = 5001
+    PORT = 5000
     Debug = True
     
 app.config.from_object(Config)
@@ -24,6 +24,11 @@ db_pool = mysql.connector.pooling.MySQLConnectionPool(
 
 @app.route("/api/photos", methods=["GET"])
 def get_photos():
+    #获取xmin等参数，从前端获取
+    xmin = request.args.get('xmin', type=float, )
+    xmax = request.args.get('xmax', type=float,)
+    ymin = request.args.get('ymin', type=float, )
+    ymax = request.args.get('ymax', type=float, )
     # 从连接池获取连接（替代直接connect）
     connection = db_pool.get_connection()
     cursor = connection.cursor(dictionary=True)
@@ -39,9 +44,6 @@ def get_photos():
 def index():
     return render_template("index.html")
 
-@app.route("/", methods=["get"])
-def base():
-    return render_template("base.html")
 
 if __name__ == "__main__":
-    app.run(debug=True,port=5001)
+    app.run()
