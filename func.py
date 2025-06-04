@@ -42,11 +42,10 @@ def get_coordinates(exif_data):
 
 """
 CREATE TABLE photos (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    path VARCHAR(255) NOT NULL,
-    latitude DECIMAL(10, 8),
-    longitude DECIMAL(11, 8),
-    taken_at DATETIME
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100),
+    location POINT SRID 4326,  -- 使用SRID 4326来表示WGS 84坐标系统中的地理位置
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 """
 
@@ -57,10 +56,10 @@ def insert_photo_to_db(path, latitude, longitude, taken_at):
     )
     cursor = connection.cursor()
     query = """
-    INSERT INTO photos (path, latitude, longitude, taken_at)
-    VALUES (%s, %s, %s, %s)
+    INSERT INTO photos (name, location)
+    VALUES (%s, ST_GeomFromText('POINT(%s  %s)'))
     """
-    values = (path, latitude, longitude, taken_at)
+    values = (path, longitude, latitude)
     cursor.execute(query, values)
     connection.commit()
     cursor.close()

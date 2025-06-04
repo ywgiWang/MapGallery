@@ -1,7 +1,15 @@
+-- 创建数据库
+CREATE DATABASE IF NOT EXISTS piconmap;
 
+-- 使用指定的数据库
+USE piconmap;
 
-CREATE TABLE locations (
+-- 删除表（注意：必须按照依赖关系逆序删除）
+DROP TABLE IF EXISTS photos;
+
+CREATE TABLE photos (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100),
-    location POINT SRID 4326  -- 使用SRID 4326来表示WGS 84坐标系统中的地理位置
+    location POINT NOT NULL,  -- MySQL 5.7.36不支持SRID语法
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

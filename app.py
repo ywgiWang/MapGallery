@@ -32,8 +32,21 @@ def get_photos():
     # 从连接池获取连接（替代直接connect）
     connection = db_pool.get_connection()
     cursor = connection.cursor(dictionary=True)
-    query = "SELECT * FROM photos"
-    cursor.execute(query)
+    # 修改查询语句，使用ST_X和ST_Y函数提取坐标
+    query = """
+    SELECT 
+        id, 
+        name as path, 
+        ST_X(location) AS lng, 
+        ST_Y(location) AS lat,
+        created_at
+    FROM photos
+    WHERE 
+        ST_X(location) BETWEEN %s AND %s
+        AND ST_Y(location) BETWEEN %s AND %s
+    """
+    # 执行查询时传入参数
+    cursor.execute(query, (xmin, xmax, ymin, ymax))
     photos = cursor.fetchall()
     cursor.close()
     connection.close()  # 实际是归还连接到池，而非真正关闭
