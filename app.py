@@ -2,6 +2,8 @@ from flask import Flask, jsonify, render_template,request
 import mysql.connector
 from flask_bootstrap import Bootstrap
 from config import DatabaseConfig  # 新增导入
+from appfunc import cluster_points
+
 
 app = Flask(__name__)
 class Config:
@@ -29,6 +31,7 @@ def get_photos():
     xmax = request.args.get('xmax', type=float,)
     ymin = request.args.get('ymin', type=float, )
     ymax = request.args.get('ymax', type=float, )
+    zoom = request.args.get('zoom', type=int, )
     # 从连接池获取连接（替代直接connect）
     connection = db_pool.get_connection()
     cursor = connection.cursor(dictionary=True)
@@ -50,6 +53,11 @@ def get_photos():
     photos = cursor.fetchall()
     cursor.close()
     connection.close()  # 实际是归还连接到池，而非真正关闭
+    points=[]
+    for photo in photos:
+        points.append((photo["lat"],photo["lng"]))
+    clusters=cluster_points(points,zoom)
+    print(clusters)
     return jsonify(photos)
 
 

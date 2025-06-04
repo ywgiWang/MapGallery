@@ -207,26 +207,29 @@
       '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
   }).addTo(map);
   map.on("moveend", function () {
+    const zoom=map.getZoom();
     const bounds = map.getBounds();
     const xmax = bounds.getEast();
     const ymax = bounds.getNorth();
     const xmin = bounds.getWest();
     const ymin = bounds.getSouth();
-    getPhotos(xmax, ymax, xmin, ymin);
+    getPhotos(xmax, ymax, xmin, ymin,zoom);
   })
   map.on("zoomend", function () {
+    const zoom=map.getZoom();
     const bounds = map.getBounds();
     const xmax = bounds.getEast();
     const ymax = bounds.getNorth();
     const xmin = bounds.getWest();
     const ymin = bounds.getSouth();
-    getPhotos(xmax, ymax, xmin, ymin);
+    getPhotos(xmax, ymax, xmin, ymin,zoom);
   })
   const bounds = map.getBounds();
   const xmax = bounds.getEast();
   const ymax = bounds.getNorth();
   const xmin = bounds.getWest();
   const ymin = bounds.getSouth();
-  getPhotos(xmax, ymax, xmin, ymin);
+  const zoom=map.getZoom();
+  getPhotos(xmax, ymax, xmin, ymin,zoom);
 </script>
 {% endblock %}
