@@ -1,4 +1,5 @@
 from sklearn.cluster import DBSCAN
+from sklearn.cluster import KMeans
 import numpy as np
 zoom_scale={
     0:591657550.49,
@@ -32,8 +33,11 @@ def cluster_points(points,zoom):
     scale_lat=scale/111320
 
     # 假设points是从MySQL获取的点集，格式为[(lat1, lon1), (lat2, lon2), ...]
-    points = np.array(points)
+    X = np.array(points)
 
     # 应用DBSCAN算法
-    db = DBSCAN(eps=scale_lat, min_samples=2).fit_predict(points)  # 根据实际情况调整eps和min_samples参数
-    return db
+    # db = DBSCAN(eps=scale_lat, min_samples=2).fit_predict(points)  # 根据实际情况调整eps和min_samples参数
+    y_pred = KMeans(n_clusters=3, random_state=9).fit_predict(X)
+    # plt.scatter(X[:, 0], X[:, 1], c=y_pred)
+    # plt.show()
+    return y_pred.tolist()
